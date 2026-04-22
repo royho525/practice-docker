@@ -1,0 +1,39 @@
+version: '5.1.1'
+# Bỏ dòng version: '5.1.1' vì nó không tồn tại và gây warning
+services:
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: mysql
+    platform: linux/x86_64
+    restart: no
+    environment:
+      MYSQL_DATABASE: team_project_db
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - '3307:3306' # Ngoài máy Windows dùng 3307, bên trong Docker dùng 3306
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - db_data:/var/lib/mysql
+
+  api:
+    build: .
+    container_name: nestjs_api_dev
+    ports:
+      - '3000:3000'
+      - '5555:5555'
+    volumes:
+      - .:/app
+    command: npm run start:dev -- --watch --watchMethod=polling
+    environment:
+      DATABASE_URL: 'mysql://root:12345@mysql:3306/team_project_db'
+    depends_on:
+      - db
+
+volumes:
+  db_data:
