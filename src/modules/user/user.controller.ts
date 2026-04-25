@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   UseInterceptors,
@@ -32,5 +33,11 @@ export class UserController {
       ...result,
       data: result.data.map((user) => new UserEntity(user)),
     };
+  }
+
+  @Get(':id')
+  async findById(@Param('id') id: number): Promise<UserEntity> {
+    const user = await this.userService.findById(+id);
+    return new UserEntity(user);
   }
 }

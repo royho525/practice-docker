@@ -28,4 +28,12 @@ export class UserService {
     });
     return { data, total, page, lastPage: Math.ceil(total / limit) };
   }
+
+  async findById(id: number): Promise<User> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    return user;
+  }
 }
