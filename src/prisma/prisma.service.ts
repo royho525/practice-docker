@@ -17,5 +17,6 @@ export class PrismaService extends PrismaClient {
       connectionLimit: 5,
     });
     super({ adapter });
+    
   }
 }
