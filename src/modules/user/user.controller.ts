@@ -2,7 +2,6 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from 'src/generated/prisma/client';
 import { QueryParamsDto } from './dto/qurey-params.dto';
-import { UserEntity } from './entity/user.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -16,12 +15,7 @@ export class UserController {
     body: CreateUserDto,
   ): Promise<User> {
     console.log(body);
-    return await this.userService.create(
-      body.email,
-      body.password,
-      body.name,
-      body.phone,
-    );
+    return await this.userService.create(body);
   }
 
   @Get()
@@ -29,7 +23,7 @@ export class UserController {
     const result = await this.userService.getAll(params);
     return {
       ...result,
-      data: result.data.map((user) => new UserEntity(user)),
+      items: result.items.map((user) => new UserResponseDto(user)),
     };
   }
 

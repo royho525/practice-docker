@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -16,6 +17,11 @@ export class UserService {
 
   async create(body: CreateUserDto): Promise<User> {
     const { email, password, name, phone } = body;
+
+    const isExisting = await this.userRepository.finByEmail(email);
+    if (isExisting) {
+      throw new ConflictException('User is existing');
+    }
     const hashedPassword = await bcypt.hash(password, 10);
     return await this.userRepository.create(email, hashedPassword, name, phone);
   }
@@ -30,12 +36,12 @@ export class UserService {
     }
     const skip = (page - 1) * limit;
     const where = name ? { name: { contains: name } } : {};
-    const { data, total } = await this.userRepository.getAll({
+    const { items, total } = await this.userRepository.getAll({
       skip,
       take: limit,
       where,
     });
-    return { data, total, page, lastPage: Math.ceil(total / limit) };
+    return { items, limit, total, page, lastPage: Math.ceil(total / limit) };
   }
 
   async findById(id: number): Promise<UserResponseDto> {

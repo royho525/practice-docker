@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   CallHandler,
   ExecutionContext,
@@ -9,6 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IApiResponse } from '../interfaces/api-response.interface';
+import { Response } from 'express';
 
 @Injectable()
 export class TransformInterceptor<T> implements NestInterceptor<
@@ -19,10 +18,11 @@ export class TransformInterceptor<T> implements NestInterceptor<
     context: ExecutionContext,
     next: CallHandler<T>,
   ): Observable<IApiResponse<T>> {
+    const response = context.switchToHttp().getResponse<Response>();
     return next.handle().pipe(
       map((data) => ({
         success: true,
-        statusCode: context.switchToHttp().getResponse().statusCode,
+        statusCode: response.statusCode,
         message: 'Success',
         data: data,
         timestamp: new Date().toISOString(),

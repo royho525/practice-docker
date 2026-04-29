@@ -19,7 +19,7 @@ export class UserRepository {
 
   async getAll(params: { skip: number; take: number; where?: object }) {
     const { skip, take, where } = params;
-    const [data, total] = await Promise.all([
+    const [items, total] = await Promise.all([
       this.prisma.user.findMany({
         skip,
         take,
@@ -28,10 +28,14 @@ export class UserRepository {
       this.prisma.user.count({ where }),
     ]);
 
-    return { data, total };
+    return { items, total };
   }
 
   async findById(id: number): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async finByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
   }
 }
