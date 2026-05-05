@@ -7,13 +7,21 @@ import {
 import { UserRepository } from './user.repository';
 import { User } from 'src/generated/prisma/client';
 import { QueryParamsDto } from './dto/qurey-params.dto';
-import * as bcypt from 'bcrypt';
+import * as brcypt from 'bcrypt';
 import { UserResponseDto } from './dto/user-response.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(private userRepository: UserRepository) {}
+
+  async findByMail(email: string): Promise<User> {
+    const user = await this.userRepository.finByEmail(email);
+    if (!user) {
+      throw new NotFoundException('User is not found');
+    }
+    return user;
+  }
 
   async create(body: CreateUserDto): Promise<User> {
     const { email, password, name, phone } = body;
@@ -22,7 +30,7 @@ export class UserService {
     if (isExisting) {
       throw new ConflictException('User is existing');
     }
-    const hashedPassword = await bcypt.hash(password, 10);
+    const hashedPassword = await brcypt.hash(password, 10);
     return await this.userRepository.create(email, hashedPassword, name, phone);
   }
 
